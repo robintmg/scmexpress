@@ -238,7 +238,6 @@
         
         <div class="left-pane">
             <h1 style="text-align: center; margin-bottom: 26px; color: #333; font-size: 20px;">📝 QuickRFP Generator</h1>
-
             <div class="form-section-title">1. Payment Type</div>
             <div class="form-row">
                 <div class="radio-group">
@@ -443,10 +442,38 @@
         iDate.valueAsDate = new Date();
         loadQueueFromStorage(); 
         loadLocalNames();
+        loadFromUrlParams();
 
         function loadLocalNames() {
             if(localStorage.getItem('rfp_requester')) iReq.value = localStorage.getItem('rfp_requester');
             if(localStorage.getItem('rfp_approver')) iApp.value = localStorage.getItem('rfp_approver');
+        }
+
+        // --- NEW FUNCTION TO READ URL DATA ---
+        function loadFromUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+
+            const setVal = (paramName, elementId) => {
+                if (params.has(paramName)) {
+                    const element = document.getElementById(elementId);
+                    if (element) {
+                        element.value = params.get(paramName);
+                    }
+                }
+            };
+
+            setVal('payee', 'payee');
+            setVal('dept', 'department');
+            setVal('approver', 'approved-by');
+            setVal('particulars', 'particulars');
+            setVal('details', 'details');
+            setVal('amount', 'amount');
+            
+            if (params.has('type')) {
+                const typeVal = params.get('type').toLowerCase();
+                const radio = document.querySelector(`input[name="type-opt"][value="${typeVal}"]`);
+                if (radio) radio.checked = true;
+            }
         }
 
         // --- STORAGE LOGIC ---
@@ -497,13 +524,14 @@
                 rfpQueue.push(rfpData);
             }
 
-            // Save inputs to local storage just in case
             localStorage.setItem('rfp_requester', iReq.value);
             localStorage.setItem('rfp_approver', iApp.value);
 
             saveQueueToStorage(); 
             updateQueueUI();
-            clearFormFields(false); 
+            
+            // NOTE: Auto-clear removed as per request.
+            // Form values persist for easy next entry.
         });
 
         // --- UI & STATE UPDATES ---
