@@ -7,169 +7,155 @@
     <style>
         /* --- GLOBAL LAYOUT --- */
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eef2f5;
             margin: 0;
             padding: 0;
             color: #333;
-            height: 100vh; /* Fix to window height */
-            overflow: hidden; /* Prevent body scroll */
+            height: 100vh;
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* --- MAIN APP CONTAINER (SPLIT VIEW) --- */
         .no-print {
-            width: 95%;
-            height: 95vh;
-            max-width: 1200px;
+            width: 98%;
+            height: 96vh;
             background: #fff;
-            padding-block: 20px;
-            padding-inline: 40px;
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            border: 1px solid #e0e0e0;
-            display: flex; /* Split Layout */
-            gap: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 1px solid #dcdcdc;
+            display: flex;
             box-sizing: border-box;
+            overflow: hidden;
         }
 
-        /* --- LEFT PANE (INPUTS) --- */
+        /* --- 60:40 SPLIT --- */
         .left-pane {
-            flex: 2; /* Takes up 66% width */
-            overflow-y: auto; /* Allow scrolling if form is long */
-            padding-right: 10px;
-        }
-
-        /* --- RIGHT PANE (QUEUE) --- */
-        .right-pane {
-            flex: 1; /* Takes up 33% width */
+            flex: 3;
+            padding: 20px;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
-            border-left: 1px solid #eee;
-            padding-left: 20px;
-            background-color: #fafafa;
-            border-radius: 8px;
-            padding: 15px;
+        }
+
+        .right-pane {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #e0e0e0;
+            background-color: #f8f9fa;
+            padding: 20px;
+            overflow: hidden; 
+        }
+
+        /* --- MAGIC IMPORT (HIDDEN) --- */
+        .magic-section {
+            display: none;
+            background: #e3f2fd;
+            border: 1px dashed #2196f3;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            flex-shrink: 0;
+        }
+        .magic-header { font-weight: bold; color: #0d47a1; font-size: 11px; margin-bottom: 5px;}
+        #magicInput {
+            width: 100%; height: 50px; border: 1px solid #90caf9; border-radius: 4px;
+            padding: 5px; font-size: 10px; font-family: monospace; resize: none;
         }
 
         /* --- FORM STYLES --- */
+        h1 { margin: 0 0 15px 0; font-size: 18px; text-align: center; cursor: default; user-select: none; }
+        
         .form-section-title {
-            font-size: 13px;
-            text-transform: uppercase;
-            color: #666;
-            letter-spacing: 1px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
-            margin-bottom: 15px;
-            margin-top: 10px;
-            font-weight: bold;
+            font-size: 11px; text-transform: uppercase; color: #888; letter-spacing: 0.5px;
+            border-bottom: 1px solid #eee; padding-bottom: 2px; margin-bottom: 8px; margin-top: 5px; font-weight: 700;
         }
 
-        .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
-        .input-group { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+        .form-row { display: flex; gap: 10px; margin-bottom: 8px; }
+        .input-group { display: flex; flex-direction: column; gap: 3px; flex: 1; }
         .grow-2 { flex: 2; } 
-        .grow-0-5 { flex: 0.5; }
+        .grow-0-5 { flex: 0.6; }
 
         input[type="text"], input[type="number"], input[type="date"], textarea { 
-            padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 13px; width: 100%; box-sizing: border-box; 
+            padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 12px; width: 100%; box-sizing: border-box; 
         }
+        textarea { resize: vertical; } 
         input:focus, textarea:focus { border-color: #007bff; outline: none; }
-        label { font-weight: bold; font-size: 12px; color: #444; }
+        label { font-weight: 600; font-size: 11px; color: #555; }
 
-        .radio-group { display: flex; gap: 10px; flex-wrap: wrap; background: #f1f3f5; padding: 10px; border-radius: 5px; width: 100%; box-sizing: border-box; }
-        .radio-group label { cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 600; font-size: 12px; }
+        .radio-group { display: flex; gap: 10px; flex-wrap: wrap; background: #f1f3f5; padding: 8px; border-radius: 4px; width: 100%; box-sizing: border-box; }
+        .radio-group label { cursor: pointer; display: flex; align-items: center; gap: 4px; font-weight: 600; font-size: 11px; margin: 0; }
 
         /* --- BUTTONS --- */
-        .btn-container { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-container { display: flex; gap: 8px; margin-top: auto; padding-top: 10px; }
         
         button { 
-            padding: 12px; cursor: pointer; border-radius: 6px; border: none; 
-            font-weight: bold; font-size: 13px; transition: all 0.2s; flex: 1; 
+            padding: 10px; cursor: pointer; border-radius: 4px; border: none; 
+            font-weight: bold; font-size: 12px; transition: all 0.2s; flex: 1; 
         }
         button:active { transform: translateY(1px); }
         
-        #addOrUpdateBtn { background-color: #ffc107; color: #333; box-shadow: 0 3px 5px rgba(255, 193, 7, 0.2); flex: 1.5; }
-        #addOrUpdateBtn:hover { filter: brightness(90%); }
-
-        #cancelClearBtn { background-color: #dc3545; color: white; box-shadow: 0 3px 5px rgba(220, 53, 69, 0.2); }
-        #cancelClearBtn:hover { background-color: #c82333; }
-
+        /* Button Colors */
+        #addBtn { background-color: #ffc107; color: #333; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1.5; }
+        #updateBtn { background-color: #007bff; color: white; display: none; flex: 1.5; } /* Hidden by default */
+        
+        #cancelClearBtn { background-color: #dc3545; color: white; }
         #printCurrentBtn { background-color: #17a2b8; color: white; }
-        #printCurrentBtn:hover { background-color: #138496; }
 
-        /* --- QUEUE STYLES (RIGHT PANE) --- */
-        .queue-header {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
-        }
-        .queue-header h4 { margin: 0; color: #333; }
+        /* --- QUEUE LIST --- */
+        .queue-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-shrink: 0;}
+        .queue-header h4 { margin: 0; color: #333; font-size: 14px; }
         
         #queue-items-container {
             flex-grow: 1;
-            overflow-y: auto; /* Scrollable list */
+            overflow-y: auto;
             margin-bottom: 10px;
             border: 1px solid #eee;
             background: white;
             border-radius: 6px;
+            padding: 5px;
         }
 
         .queue-item {
-            padding: 10px; border-bottom: 1px solid #f0f0f0; font-size: 12px; display: flex; flex-direction: column; gap: 5px;
+            padding: 10px; border-bottom: 1px solid #f0f0f0; 
+            display: flex; flex-direction: column; gap: 4px;
+            position: relative;
         }
         .queue-item:last-child { border-bottom: none; }
         .queue-item.editing { border-left: 4px solid #007bff; background-color: #eef6fc; }
 
-        .q-info { font-weight: bold; display: flex; justify-content: space-between; }
-        .q-details { color: #666; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        /* Queue Layout Specifics */
+        .q-header { font-weight: bold; font-size: 12px; color: #000; }
+        .q-sub { font-size: 11px; color: #444; display: flex; justify-content: space-between;}
+        .q-details { 
+            color: #666; font-size: 10px; 
+            white-space: normal; word-wrap: break-word; line-height: 1.3;
+            background: #fdfdfd; padding: 4px; border-radius: 4px; border: 1px solid #f0f0f0; margin-top: 2px;
+        }
 
-        .q-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 2px; }
-        .q-btn { cursor: pointer; font-weight: bold; font-size: 11px; padding: 2px 6px; border-radius: 3px; }
+        .q-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 5px; }
+        .q-btn { cursor: pointer; font-weight: bold; font-size: 10px; padding: 2px 8px; border-radius: 3px; }
         .q-edit { color: #007bff; background: #ebf5ff; }
         .q-remove { color: #dc3545; background: #ffeef0; }
 
-        /* Queue Controls */
-        .queue-controls { display: flex; gap: 10px; flex-shrink: 0; }
-        #printQueueBtn { background-color: #28a745; color: white; }
-        #clearQueueBtn { background-color: #6c757d; color: white; flex: 0.5; }
+        .queue-controls { display: flex; gap: 8px; flex-shrink: 0; }
+        #printQueueBtn { background-color: #28a745; color: white; padding: 12px;}
+        #clearQueueBtn { background-color: #6c757d; color: white; flex: 0.4; }
 
-        /* --- NAVIGATION & PRINT AREA --- */
+        /* --- PRINT AREA --- */
         .action-buttons { 
-            position: fixed; 
-            bottom: 30px; 
-            left: 50%; /* Center Horizontally */
-            transform: translateX(-50%); 
-            z-index: 100; 
-            display: none; /* Hidden by default */
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; display: none; 
         }
-        
-        #backBtn { 
-            background-color: #007bff; color: white; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
-            width: auto; padding: 12px 30px; font-size: 14px; 
-        }
+        #backBtn { background-color: #007bff; color: white; width: auto; padding: 10px 25px; }
 
-        #print-area { display: none; } /* Hidden on screen */
+        #print-area { display: none; }
         .hidden-on-screen { display: none !important; }
 
-        /* --- PRINT TEMPLATE STYLES --- */
-        .print-page {
-            width: 850px; 
-            height: 1050px; 
-            margin: 0 auto;
-            background-color: white;
-            padding: 30px 40px;
-            box-sizing: border-box;
-            border: 1px solid #ccc; 
-            display: flex; 
-            flex-direction: column;
-            gap: 15px; 
-            page-break-after: always;
-            overflow: hidden;
-            margin-bottom: 20px; 
-        }
-
-        /* Internal Print Classes */
+        /* --- PRINT CSS (Standard) --- */
+        .print-page { width: 850px; height: 1050px; margin: 0 auto; background-color: white; padding: 30px 40px; box-sizing: border-box; border: 1px solid #ccc; display: flex; flex-direction: column; gap: 15px; page-break-after: always; overflow: hidden; margin-bottom: 20px; }
         .header-section { display: flex; align-items: center; justify-content: center; margin-bottom: 5px; position: relative; min-height: 80px; }
         .logo-placeholder { width: 120px; position: absolute; left: 0; top: 50%; transform: translateY(-50%); }
         .logo-placeholder img { max-width: 100%; height: auto; object-fit: contain; }
@@ -211,23 +197,12 @@
         .finance-label { white-space: nowrap; font-size: 0.9em; min-width: 60px; }
         .finance-input-line { flex-grow: 1; border-bottom: 1px solid black; min-width: 150px; min-height: 1.5em; }
 
-        /* --- PRINT MEDIA QUERY --- */
         @media print {
             @page { margin: 0; size: auto; }
             body, html { width: 100%; height: 100%; margin: 0 !important; padding: 0 !important; overflow: visible !important; background-color: white; display: block; }
             .no-print, .action-buttons { display: none !important; }
-            
             #print-area { display: block !important; }
-
-            .print-page { 
-                width: 100% !important; 
-                height: 100vh !important; 
-                margin: 0 !important; 
-                padding: 30px 40px !important; 
-                border: none !important; 
-                box-shadow: none !important;
-                page-break-after: always !important; 
-            }
+            .print-page { width: 100% !important; height: 100vh !important; margin: 0 !important; padding: 30px 40px !important; border: none !important; box-shadow: none !important; page-break-after: always !important; }
             .print-page:last-child { page-break-after: auto !important; }
         }
     </style>
@@ -237,7 +212,13 @@
     <div id="input-section" class="no-print">
         
         <div class="left-pane">
-            <h1 style="text-align: center; margin-bottom: 26px; color: #333; font-size: 20px;">📝 QuickRFP Generator</h1>
+            <h1 id="appTitle" title="Double click for Magic Import">📝 QuickRFP Generator</h1>
+
+            <div id="magicSection" class="magic-section">
+                <div class="magic-header"><span>⚡ <b>Magic Import</b> (Paste Excel Rows)</span></div>
+                <textarea id="magicInput" placeholder="Paste data row(s) here..."></textarea>
+            </div>
+
             <div class="form-section-title">1. Payment Type</div>
             <div class="form-row">
                 <div class="radio-group">
@@ -285,28 +266,31 @@
             <div class="form-row">
                 <div class="input-group">
                     <label>Additional Details:</label>
-                    <textarea id="details" rows="2" placeholder="Extra notes..."></textarea>
+                    <textarea id="details" rows="5" placeholder="Extra notes (PO, SI, DR, Shop)..."></textarea>
                 </div>
             </div>
 
-            <div class="form-row" style="align-items: flex-end; background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px dashed #ccc;">
+            <div class="form-row" style="align-items: flex-end; background: #f9f9f9; padding: 10px; border-radius: 4px; border: 1px dashed #ccc;">
                 <div class="input-group grow-0-5">
                     <label>Currency:</label>
-                    <div class="radio-group" style="padding: 10px; margin: 0;">
+                    <div class="radio-group" style="padding: 8px; margin: 0;">
                         <label><input type="radio" name="currency-opt" value="₱" checked> (₱) Peso</label>
                         <label><input type="radio" name="currency-opt" value="$"> ($) USD</label>
                     </div>
                 </div>
                 <div class="input-group grow-2">
                     <label>Total Amount:</label>
-                    <input type="number" id="amount" placeholder="0.00" style="font-size: 18px; font-weight: bold;">
+                    <input type="number" id="amount" placeholder="0.00" style="font-size: 16px; font-weight: bold;">
                 </div>
             </div>
             
             <div class="btn-container">
                 <button id="cancelClearBtn">❌ Clear Form</button>
                 <button id="printCurrentBtn">🖨️ Print Current Only</button>
-                <button id="addOrUpdateBtn">➕ Add to Queue</button>
+                
+                <button id="updateBtn">💾 Update Item</button>
+                
+                <button id="addBtn">➕ Add to Queue</button>
             </div>
         </div>
 
@@ -315,8 +299,7 @@
                 <h4>🖨️ Print Queue</h4>
             </div>
             
-            <div id="queue-items-container">
-                </div>
+            <div id="queue-items-container"></div>
 
             <div class="queue-controls">
                 <button id="clearQueueBtn">🗑️ Clear All</button>
@@ -417,12 +400,15 @@
         let editingId = null; 
 
         // Elements
+        const magicSection = document.getElementById('magicSection');
+        const magicInput = document.getElementById('magicInput');
+        const queueItemsContainer = document.getElementById('queue-items-container');
         const inputSection = document.getElementById('input-section');
         const printArea = document.getElementById('print-area');
         const actionButtons = document.getElementById('action-buttons');
-        const queueItemsContainer = document.getElementById('queue-items-container');
         
-        const btnAdd = document.getElementById('addOrUpdateBtn');
+        const btnAdd = document.getElementById('addBtn');
+        const btnUpdate = document.getElementById('updateBtn');
         const btnPrintCurrent = document.getElementById('printCurrentBtn');
         const btnPrintBatch = document.getElementById('printQueueBtn');
         const btnClearQueue = document.getElementById('clearQueueBtn');
@@ -449,26 +435,26 @@
             if(localStorage.getItem('rfp_approver')) iApp.value = localStorage.getItem('rfp_approver');
         }
 
-        // --- NEW FUNCTION TO READ URL DATA ---
         function loadFromUrlParams() {
             const params = new URLSearchParams(window.location.search);
-
-            const setVal = (paramName, elementId) => {
-                if (params.has(paramName)) {
-                    const element = document.getElementById(elementId);
-                    if (element) {
-                        element.value = params.get(paramName);
+            const setVal = (paramNames, elementId) => {
+                const element = document.getElementById(elementId);
+                if (!element) return;
+                const names = Array.isArray(paramNames) ? paramNames : [paramNames];
+                for (const name of names) {
+                    if (params.has(name)) {
+                        element.value = params.get(name);
+                        return;
                     }
                 }
             };
-
             setVal('payee', 'payee');
-            setVal('dept', 'department');
-            setVal('approver', 'approved-by');
+            setVal(['dept', 'department'], 'department');
+            setVal(['req', 'requestor', 'requested_by'], 'request-by');
+            setVal(['app', 'approver', 'approved_by'], 'approved-by');
             setVal('particulars', 'particulars');
             setVal('details', 'details');
             setVal('amount', 'amount');
-            
             if (params.has('type')) {
                 const typeVal = params.get('type').toLowerCase();
                 const radio = document.querySelector(`input[name="type-opt"][value="${typeVal}"]`);
@@ -476,29 +462,26 @@
             }
         }
 
-        // --- STORAGE LOGIC ---
-        function saveQueueToStorage() {
-            localStorage.setItem('rfpQueue', JSON.stringify(rfpQueue));
-        }
+        document.getElementById('appTitle').addEventListener('dblclick', () => {
+            magicSection.style.display = magicSection.style.display === 'block' ? 'none' : 'block';
+        });
 
+        function saveQueueToStorage() { localStorage.setItem('rfpQueue', JSON.stringify(rfpQueue)); }
         function loadQueueFromStorage() {
             const saved = localStorage.getItem('rfpQueue');
-            if(saved) {
-                rfpQueue = JSON.parse(saved);
-                updateQueueUI();
-            }
+            if(saved) { rfpQueue = JSON.parse(saved); updateQueueUI(); }
         }
 
-        // --- ADD / UPDATE LOGIC ---
-        btnAdd.addEventListener('click', () => {
+        // --- HELPER: Get Form Data ---
+        function getFormData() {
             if(!iPayee.value || !iAmount.value || !iParticulars.value) {
-                alert("Please fill in Payee, Particulars, and Amount."); return;
+                alert("Please fill in Payee, Particulars, and Amount."); return null;
             }
-
             const type = document.querySelector('input[name="type-opt"]:checked').value;
             const currency = document.querySelector('input[name="currency-opt"]:checked').value;
             
-            const rfpData = {
+            return {
+                id: Date.now(),
                 type: type,
                 payee: iPayee.value.toUpperCase(),
                 dept: iDept.value.toUpperCase(),
@@ -511,27 +494,88 @@
                 amount: parseFloat(iAmount.value),
                 currency: currency
             };
+        }
+
+        // --- HELPER: Check Duplicate ---
+        function isDuplicate(data, excludeId = null) {
+            return rfpQueue.some(q => 
+                q.id !== excludeId &&
+                q.payee === data.payee &&
+                q.amount === data.amount &&
+                q.particularsRaw === data.particularsRaw
+            );
+        }
+
+        // --- BUTTON: ADD TO QUEUE ---
+        btnAdd.addEventListener('click', () => {
+            const rfpData = getFormData();
+            if(!rfpData) return;
+
+            if(isDuplicate(rfpData)) {
+                if(!confirm("Duplicate Item detected (Same Payee, Amount, and Particulars). Add anyway?")) return;
+            }
+
+            rfpQueue.push(rfpData);
+            finishAction();
+        });
+
+        // --- BUTTON: UPDATE ITEM ---
+        btnUpdate.addEventListener('click', () => {
+            const rfpData = getFormData();
+            if(!rfpData) return;
 
             if(editingId) {
                 const index = rfpQueue.findIndex(q => q.id === editingId);
                 if(index !== -1) {
-                    rfpData.id = editingId; 
+                    rfpData.id = editingId; // Keep original ID
                     rfpQueue[index] = rfpData;
                 }
                 resetToNormalMode();
-            } else {
-                rfpData.id = Date.now();
-                rfpQueue.push(rfpData);
+                finishAction();
             }
+        });
 
+        function finishAction() {
             localStorage.setItem('rfp_requester', iReq.value);
             localStorage.setItem('rfp_approver', iApp.value);
-
             saveQueueToStorage(); 
             updateQueueUI();
-            
-            // NOTE: Auto-clear removed as per request.
-            // Form values persist for easy next entry.
+        }
+
+        // --- MAGIC IMPORT ---
+        magicInput.addEventListener('input', () => {
+            const text = magicInput.value.trim();
+            if(!text) return;
+            const rows = text.split('\n');
+            let addedCount = 0;
+            rows.forEach(row => {
+                let cols = row.split('\t');
+                if(cols.length < 10) return; 
+                const rawAmt = cols[12] ? cols[12].replace(/[^0-9.-]+/g,"") : "0";
+                let detailsText = "";
+                if(cols[9]) detailsText += cols[9]; 
+                if(cols[7]) detailsText += (detailsText ? "\n" : "") + "SI# " + cols[7];
+                if(cols[8]) detailsText += (detailsText ? "  " : "") + "DR# " + cols[8];
+                if(cols[13]) detailsText += "\n" + cols[13]; 
+
+                const rfpData = {
+                    id: Date.now() + Math.random(), 
+                    type: 'external',
+                    payee: (cols[6] || "").toUpperCase(),
+                    dept: (cols[15] || "").toUpperCase(),
+                    date: iDate.value,
+                    req: (cols[11] || "").toUpperCase(),
+                    app: (cols[16] || "").toUpperCase(),
+                    particularsRaw: cols[1] || "",
+                    detailsRaw: detailsText,
+                    particulars: (cols[1] || "") + (detailsText ? '\n\n' + detailsText : ''),
+                    amount: parseFloat(rawAmt) || 0,
+                    currency: '₱' 
+                };
+                rfpQueue.push(rfpData);
+                addedCount++;
+            });
+            if(addedCount > 0) { saveQueueToStorage(); updateQueueUI(); magicInput.value = ''; }
         });
 
         // --- UI & STATE UPDATES ---
@@ -555,11 +599,12 @@
                 const fmtAmt = item.amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
                 div.innerHTML = `
-                    <div class="q-info">
-                        <span>${index+1}. ${item.payee}</span>
-                        <span>${item.currency} ${fmtAmt}</span>
+                    <div class="q-header">${item.particularsRaw}</div>
+                    <div class="q-sub">
+                        <span>${item.payee}</span>
+                        <span><b>${item.currency} ${fmtAmt}</b></span>
                     </div>
-                    <div class="q-details">${item.particularsRaw.substring(0, 30)}...</div>
+                    <div class="q-details">${item.detailsRaw}</div>
                     <div class="q-actions">
                         <span class="q-btn q-edit" onclick="editQueueItem(${item.id})">Edit</span>
                         <span class="q-btn q-remove" onclick="removeItem(${item.id})">Remove</span>
@@ -573,12 +618,8 @@
             const item = rfpQueue.find(q => q.id === id);
             if(!item) return;
 
-            iPayee.value = item.payee;
-            iDept.value = item.dept;
-            iDate.value = item.date;
-            iReq.value = item.req;
-            iApp.value = item.app;
-            iAmount.value = item.amount;
+            iPayee.value = item.payee; iDept.value = item.dept; iDate.value = item.date;
+            iReq.value = item.req; iApp.value = item.app; iAmount.value = item.amount;
             iParticulars.value = item.particularsRaw || ''; 
             iDetails.value = item.detailsRaw || '';
 
@@ -586,38 +627,34 @@
             document.querySelector(`input[name="currency-opt"][value="${item.currency}"]`).checked = true;
 
             editingId = id;
-            btnAdd.textContent = "💾 Update Item";
-            btnAdd.style.backgroundColor = "#007bff"; 
-            btnAdd.style.color = "#fff";
+            
+            // SHOW UPDATE BUTTON, CHANGE ADD LABEL
+            btnUpdate.style.display = "block";
+            btnAdd.textContent = "➕ Add as New"; 
+            btnAdd.style.backgroundColor = "#ffc107";
+            btnAdd.style.color = "#333";
             btnCancelClear.textContent = "❌ Cancel Edit";
             
             updateQueueUI();
         }
 
         window.removeItem = function(id) {
-            if(editingId === id) {
-                resetToNormalMode();
-                clearFormFields(false);
-            }
+            if(editingId === id) resetToNormalMode();
             rfpQueue = rfpQueue.filter(item => item.id !== id);
             saveQueueToStorage(); 
             updateQueueUI();
         }
 
-        // --- ACTIONS ---
         function resetToNormalMode() {
             editingId = null;
+            btnUpdate.style.display = "none";
             btnAdd.textContent = "➕ Add to Queue";
             btnAdd.style.backgroundColor = "#ffc107";
-            btnAdd.style.color = "#333";
             btnCancelClear.textContent = "❌ Clear Form";
         }
 
         function clearFormFields(clearNames) {
-            iPayee.value = '';
-            iParticulars.value = '';
-            iDetails.value = '';
-            iAmount.value = '';
+            iPayee.value = ''; iParticulars.value = ''; iDetails.value = ''; iAmount.value = '';
             iDate.valueAsDate = new Date();
             if(clearNames) { iReq.value = ''; iApp.value = ''; }
         }
@@ -625,72 +662,38 @@
         btnCancelClear.addEventListener('click', () => {
             if(editingId) {
                 resetToNormalMode();
-                clearFormFields(false);
                 updateQueueUI();
             } else {
-                if(confirm("Clear everything including Names?")) {
-                    clearFormFields(true); 
-                }
+                if(confirm("Clear everything including Names?")) clearFormFields(true); 
             }
         });
 
-        // Clear All Queue
         btnClearQueue.addEventListener('click', () => {
             if(rfpQueue.length === 0) return;
-            if(confirm("Are you sure you want to delete ALL items in the queue?")) {
-                rfpQueue = [];
-                saveQueueToStorage();
-                updateQueueUI();
-                if(editingId) { resetToNormalMode(); clearFormFields(false); }
+            if(confirm("Delete ALL items in the queue?")) {
+                rfpQueue = []; saveQueueToStorage(); updateQueueUI();
+                if(editingId) resetToNormalMode();
             }
         });
 
         // --- PRINTING ---
-        
-        // 1. Print Current Only
         btnPrintCurrent.addEventListener('click', () => {
-            if(!iPayee.value || !iAmount.value || !iParticulars.value) {
-                alert("Please fill in form first."); return;
-            }
-            
-            const type = document.querySelector('input[name="type-opt"]:checked').value;
-            const currency = document.querySelector('input[name="currency-opt"]:checked').value;
-            const singleItem = {
-                type: type,
-                payee: iPayee.value.toUpperCase(),
-                dept: iDept.value.toUpperCase(),
-                date: iDate.value,
-                req: iReq.value.toUpperCase(),
-                app: iApp.value.toUpperCase(),
-                particulars: iParticulars.value + (iDetails.value ? '\n\n' + iDetails.value : ''),
-                amount: parseFloat(iAmount.value),
-                currency: currency
-            };
-
-            // Save Names
-            localStorage.setItem('rfp_requester', iReq.value);
-            localStorage.setItem('rfp_approver', iApp.value);
-
-            generatePrintPreview([singleItem]);
-            executePrint();
+            if(!iPayee.value || !iAmount.value || !iParticulars.value) { alert("Fill form first."); return; }
+            const rfpData = getFormData();
+            if(!rfpData) return;
+            generatePrintPreview([rfpData]); executePrint();
         });
 
-        // 2. Print Batch
         btnPrintBatch.addEventListener('click', () => {
-            if(rfpQueue.length === 0) {
-                alert("Queue is empty!"); return;
-            }
-            generatePrintPreview(rfpQueue);
-            executePrint();
+            if(rfpQueue.length === 0) { alert("Queue is empty!"); return; }
+            generatePrintPreview(rfpQueue); executePrint();
         });
 
         function generatePrintPreview(dataArray) {
             printArea.innerHTML = '';
             const template = document.getElementById('rfp-template');
-
             dataArray.forEach(data => {
                 const clone = template.content.cloneNode(true);
-                
                 if(data.type === 'cash') clone.querySelector('.box-cash').textContent = '✓';
                 if(data.type === 'reimbursement') clone.querySelector('.box-reimburse').textContent = '✓';
                 if(data.type === 'pcf') clone.querySelector('.box-pcf').textContent = '✓';
@@ -698,12 +701,10 @@
 
                 clone.querySelector('.val-payee').textContent = data.payee;
                 clone.querySelector('.val-dept').textContent = data.dept;
-                
                 if(data.date) {
                     const [y, m, d] = data.date.split('-');
                     clone.querySelector('.val-date').textContent = `${m}/${d}/${y}`;
                 }
-
                 clone.querySelector('.val-req').textContent = data.req;
                 clone.querySelector('.val-app').textContent = data.app;
                 clone.querySelector('.val-particulars').textContent = data.particulars;
@@ -711,7 +712,6 @@
                 const fmtAmt = data.amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
                 clone.querySelector('.val-amount').textContent = `${fmtAmt}`;
                 clone.querySelector('.val-total').textContent = `${data.currency} ${fmtAmt}`;
-
                 printArea.appendChild(clone);
             });
         }
@@ -719,12 +719,12 @@
         function executePrint() {
             inputSection.style.display = 'none';
             printArea.style.display = 'block';
-            actionButtons.style.display = 'block'; // Show Centered Back Button
+            actionButtons.style.display = 'block'; 
             setTimeout(() => window.print(), 500);
         }
 
         document.getElementById('backBtn').addEventListener('click', () => {
-            inputSection.style.display = 'flex'; // Restore Flex layout
+            inputSection.style.display = 'flex'; 
             printArea.style.display = 'none';
             actionButtons.style.display = 'none';
         });
