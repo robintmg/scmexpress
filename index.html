@@ -98,9 +98,8 @@
         }
         button:active { transform: translateY(1px); }
         
-        /* Button Colors */
         #addBtn { background-color: #ffc107; color: #333; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1.5; }
-        #updateBtn { background-color: #007bff; color: white; display: none; flex: 1.5; } /* Hidden by default */
+        #updateBtn { background-color: #007bff; color: white; display: none; flex: 1.5; } 
         
         #cancelClearBtn { background-color: #dc3545; color: white; }
         #printCurrentBtn { background-color: #17a2b8; color: white; }
@@ -127,7 +126,6 @@
         .queue-item:last-child { border-bottom: none; }
         .queue-item.editing { border-left: 4px solid #007bff; background-color: #eef6fc; }
 
-        /* Queue Layout Specifics */
         .q-header { font-weight: bold; font-size: 12px; color: #000; }
         .q-sub { font-size: 11px; color: #444; display: flex; justify-content: space-between;}
         .q-details { 
@@ -145,16 +143,10 @@
         #printQueueBtn { background-color: #28a745; color: white; padding: 12px;}
         #clearQueueBtn { background-color: #6c757d; color: white; flex: 0.4; }
 
-        /* --- PRINT AREA --- */
-        .action-buttons { 
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; display: none; 
-        }
-        #backBtn { background-color: #007bff; color: white; width: auto; padding: 10px 25px; }
-
+        /* --- PRINT AREA (HIDDEN ON SCREEN) --- */
         #print-area { display: none; }
-        .hidden-on-screen { display: none !important; }
 
-        /* --- PRINT CSS (Standard) --- */
+        /* --- PRINT CSS --- */
         .print-page { width: 850px; height: 1050px; margin: 0 auto; background-color: white; padding: 30px 40px; box-sizing: border-box; border: 1px solid #ccc; display: flex; flex-direction: column; gap: 15px; page-break-after: always; overflow: hidden; margin-bottom: 20px; }
         .header-section { display: flex; align-items: center; justify-content: center; margin-bottom: 5px; position: relative; min-height: 80px; }
         .logo-placeholder { width: 120px; position: absolute; left: 0; top: 50%; transform: translateY(-50%); }
@@ -200,8 +192,13 @@
         @media print {
             @page { margin: 0; size: auto; }
             body, html { width: 100%; height: 100%; margin: 0 !important; padding: 0 !important; overflow: visible !important; background-color: white; display: block; }
-            .no-print, .action-buttons { display: none !important; }
+            
+            /* Hide the main UI */
+            .no-print { display: none !important; }
+            
+            /* Show the print area */
             #print-area { display: block !important; }
+            
             .print-page { width: 100% !important; height: 100vh !important; margin: 0 !important; padding: 30px 40px !important; border: none !important; box-shadow: none !important; page-break-after: always !important; }
             .print-page:last-child { page-break-after: auto !important; }
         }
@@ -311,10 +308,6 @@
 
     <div id="print-area"></div>
 
-    <div class="action-buttons" id="action-buttons">
-        <button id="backBtn">← Edit / Add More</button>
-    </div>
-
     <template id="rfp-template">
         <div class="print-page">
             <div class="header-section">
@@ -403,9 +396,7 @@
         const magicSection = document.getElementById('magicSection');
         const magicInput = document.getElementById('magicInput');
         const queueItemsContainer = document.getElementById('queue-items-container');
-        const inputSection = document.getElementById('input-section');
         const printArea = document.getElementById('print-area');
-        const actionButtons = document.getElementById('action-buttons');
         
         const btnAdd = document.getElementById('addBtn');
         const btnUpdate = document.getElementById('updateBtn');
@@ -542,7 +533,7 @@
             updateQueueUI();
         }
 
-        // --- MAGIC IMPORT ---
+        // --- MAGIC IMPORT LOGIC ---
         magicInput.addEventListener('input', () => {
             const text = magicInput.value.trim();
             if(!text) return;
@@ -551,21 +542,24 @@
             rows.forEach(row => {
                 let cols = row.split('\t');
                 if(cols.length < 10) return; 
-                const rawAmt = cols[12] ? cols[12].replace(/[^0-9.-]+/g,"") : "0";
+                
+                // MAPPING: 1:Desc, 2:Shop, 3:Supplier, 4:Req, 5:PO, 7:Amt, 12:SI, 13:DR, 14:Dept, 15:App
+                const rawAmt = cols[7] ? cols[7].replace(/[^0-9.-]+/g,"") : "0";
+                
                 let detailsText = "";
-                if(cols[9]) detailsText += cols[9]; 
-                if(cols[7]) detailsText += (detailsText ? "\n" : "") + "SI# " + cols[7];
-                if(cols[8]) detailsText += (detailsText ? "  " : "") + "DR# " + cols[8];
-                if(cols[13]) detailsText += "\n" + cols[13]; 
+                if(cols[5]) detailsText += cols[5]; // PO
+                if(cols[12]) detailsText += (detailsText ? "\n" : "") + "SI# " + cols[12];
+                if(cols[13]) detailsText += (detailsText ? "  " : "") + "DR# " + cols[13];
+                if(cols[2]) detailsText += "\n" + cols[2]; // Shop
 
                 const rfpData = {
                     id: Date.now() + Math.random(), 
                     type: 'external',
-                    payee: (cols[6] || "").toUpperCase(),
-                    dept: (cols[15] || "").toUpperCase(),
+                    payee: (cols[3] || "").toUpperCase(),
+                    dept: (cols[14] || "").toUpperCase(),
                     date: iDate.value,
-                    req: (cols[11] || "").toUpperCase(),
-                    app: (cols[16] || "").toUpperCase(),
+                    req: (cols[4] || "").toUpperCase(),
+                    app: (cols[15] || "").toUpperCase(),
                     particularsRaw: cols[1] || "",
                     detailsRaw: detailsText,
                     particulars: (cols[1] || "") + (detailsText ? '\n\n' + detailsText : ''),
@@ -628,7 +622,6 @@
 
             editingId = id;
             
-            // SHOW UPDATE BUTTON, CHANGE ADD LABEL
             btnUpdate.style.display = "block";
             btnAdd.textContent = "➕ Add as New"; 
             btnAdd.style.backgroundColor = "#ffc107";
@@ -677,6 +670,10 @@
         });
 
         // --- PRINTING ---
+        function executePrint() {
+            setTimeout(() => window.print(), 500);
+        }
+
         btnPrintCurrent.addEventListener('click', () => {
             if(!iPayee.value || !iAmount.value || !iParticulars.value) { alert("Fill form first."); return; }
             const rfpData = getFormData();
@@ -715,19 +712,6 @@
                 printArea.appendChild(clone);
             });
         }
-
-        function executePrint() {
-            inputSection.style.display = 'none';
-            printArea.style.display = 'block';
-            actionButtons.style.display = 'block'; 
-            setTimeout(() => window.print(), 500);
-        }
-
-        document.getElementById('backBtn').addEventListener('click', () => {
-            inputSection.style.display = 'flex'; 
-            printArea.style.display = 'none';
-            actionButtons.style.display = 'none';
-        });
     </script>
 </body>
 </html>
