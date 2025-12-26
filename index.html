@@ -120,18 +120,18 @@
 
         .queue-item {
             padding: 10px; border-bottom: 1px solid #f0f0f0; 
-            display: flex; flex-direction: column; gap: 4px;
+            display: flex; flex-direction: column; gap: 2px;
             position: relative;
         }
         .queue-item:last-child { border-bottom: none; }
         .queue-item.editing { border-left: 4px solid #007bff; background-color: #eef6fc; }
 
-        .q-header { font-weight: bold; font-size: 12px; color: #000; }
-        .q-sub { font-size: 11px; color: #444; display: flex; justify-content: space-between;}
-        .q-details { 
-            color: #666; font-size: 10px; 
-            white-space: normal; word-wrap: break-word; line-height: 1.3;
-            background: #fdfdfd; padding: 4px; border-radius: 4px; border: 1px solid #f0f0f0; margin-top: 2px;
+        .q-row-particulars { font-weight: 800; font-size: 12px; color: #000; }
+        .q-row-payee { font-size: 11px; color: #333; font-weight: 600; display: flex; justify-content: space-between;}
+        .q-row-details { 
+            font-size: 10px; color: #666; 
+            white-space: normal; word-wrap: break-word; line-height: 1.2;
+            margin-top: 2px;
         }
 
         .q-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 5px; }
@@ -143,8 +143,9 @@
         #printQueueBtn { background-color: #28a745; color: white; padding: 12px;}
         #clearQueueBtn { background-color: #6c757d; color: white; flex: 0.4; }
 
-        /* --- PRINT AREA (HIDDEN ON SCREEN) --- */
+        /* --- PRINT AREA --- */
         #print-area { display: none; }
+        .hidden-on-screen { display: none !important; }
 
         /* --- PRINT CSS --- */
         .print-page { width: 850px; height: 1050px; margin: 0 auto; background-color: white; padding: 30px 40px; box-sizing: border-box; border: 1px solid #ccc; display: flex; flex-direction: column; gap: 15px; page-break-after: always; overflow: hidden; margin-bottom: 20px; }
@@ -192,13 +193,8 @@
         @media print {
             @page { margin: 0; size: auto; }
             body, html { width: 100%; height: 100%; margin: 0 !important; padding: 0 !important; overflow: visible !important; background-color: white; display: block; }
-            
-            /* Hide the main UI */
             .no-print { display: none !important; }
-            
-            /* Show the print area */
             #print-area { display: block !important; }
-            
             .print-page { width: 100% !important; height: 100vh !important; margin: 0 !important; padding: 30px 40px !important; border: none !important; box-shadow: none !important; page-break-after: always !important; }
             .print-page:last-child { page-break-after: auto !important; }
         }
@@ -420,6 +416,7 @@
         loadQueueFromStorage(); 
         loadLocalNames();
         loadFromUrlParams();
+        handleAutoPrint();
 
         function loadLocalNames() {
             if(localStorage.getItem('rfp_requester')) iReq.value = localStorage.getItem('rfp_requester');
@@ -453,6 +450,21 @@
             }
         }
 
+        function handleAutoPrint() {
+            const params = new URLSearchParams(window.location.search);
+            if(params.has('payee') && params.has('amount') && params.has('particulars')) {
+                if(iPayee.value && iAmount.value && iParticulars.value) {
+                    const rfpData = getFormData();
+                    if(rfpData) {
+                        generatePrintPreview([rfpData]);
+                        setTimeout(() => {
+                            executePrint();
+                        }, 800);
+                    }
+                }
+            }
+        }
+
         document.getElementById('appTitle').addEventListener('dblclick', () => {
             magicSection.style.display = magicSection.style.display === 'block' ? 'none' : 'block';
         });
@@ -466,7 +478,8 @@
         // --- HELPER: Get Form Data ---
         function getFormData() {
             if(!iPayee.value || !iAmount.value || !iParticulars.value) {
-                alert("Please fill in Payee, Particulars, and Amount."); return null;
+                // alert("Please fill in Payee, Particulars, and Amount."); 
+                return null;
             }
             const type = document.querySelector('input[name="type-opt"]:checked').value;
             const currency = document.querySelector('input[name="currency-opt"]:checked').value;
@@ -500,7 +513,7 @@
         // --- BUTTON: ADD TO QUEUE ---
         btnAdd.addEventListener('click', () => {
             const rfpData = getFormData();
-            if(!rfpData) return;
+            if(!rfpData) { alert("Please fill in Payee, Particulars, and Amount."); return; }
 
             if(isDuplicate(rfpData)) {
                 if(!confirm("Duplicate Item detected (Same Payee, Amount, and Particulars). Add anyway?")) return;
@@ -512,18 +525,19 @@
 
         // --- BUTTON: UPDATE ITEM ---
         btnUpdate.addEventListener('click', () => {
+            if(!editingId) return;
+            
             const rfpData = getFormData();
-            if(!rfpData) return;
+            if(!rfpData) { alert("Please fill in Payee, Particulars, and Amount."); return; }
 
-            if(editingId) {
-                const index = rfpQueue.findIndex(q => q.id === editingId);
-                if(index !== -1) {
-                    rfpData.id = editingId; // Keep original ID
-                    rfpQueue[index] = rfpData;
-                }
-                resetToNormalMode();
-                finishAction();
+            const index = rfpQueue.findIndex(q => q.id === editingId);
+            if(index !== -1) {
+                rfpData.id = editingId; 
+                rfpQueue[index] = rfpData;
             }
+            
+            resetToNormalMode();
+            finishAction();
         });
 
         function finishAction() {
@@ -533,7 +547,7 @@
             updateQueueUI();
         }
 
-        // --- MAGIC IMPORT LOGIC ---
+        // --- MAGIC IMPORT LOGIC (NEW COLUMN MAPPING) ---
         magicInput.addEventListener('input', () => {
             const text = magicInput.value.trim();
             if(!text) return;
@@ -541,28 +555,29 @@
             let addedCount = 0;
             rows.forEach(row => {
                 let cols = row.split('\t');
-                if(cols.length < 10) return; 
+                if(cols.length < 5) return; 
                 
-                // MAPPING: 1:Desc, 2:Shop, 3:Supplier, 4:Req, 5:PO, 7:Amt, 12:SI, 13:DR, 14:Dept, 15:App
-                const rawAmt = cols[7] ? cols[7].replace(/[^0-9.-]+/g,"") : "0";
+                // MAPPING: 
+                // 2:BUYER/REQ, 4:PO, 6:DESC, 7:BRANCH, 8:SUPPLIER, 9:AMT, 10:SI, 11:DR, 17:DEPT, 18:APP
+                const rawAmt = cols[9] ? cols[9].replace(/[^0-9.-]+/g,"") : "0";
                 
                 let detailsText = "";
-                if(cols[5]) detailsText += cols[5]; // PO
-                if(cols[12]) detailsText += (detailsText ? "\n" : "") + "SI# " + cols[12];
-                if(cols[13]) detailsText += (detailsText ? "  " : "") + "DR# " + cols[13];
-                if(cols[2]) detailsText += "\n" + cols[2]; // Shop
+                if(cols[4]) detailsText += cols[4]; // PO
+                if(cols[10]) detailsText += (detailsText ? "\n" : "") + "SI# " + cols[10];
+                if(cols[11]) detailsText += (detailsText ? "  " : "") + "DR# " + cols[11];
+                if(cols[7]) detailsText += "\n" + cols[7]; // Branch
 
                 const rfpData = {
                     id: Date.now() + Math.random(), 
                     type: 'external',
-                    payee: (cols[3] || "").toUpperCase(),
-                    dept: (cols[14] || "").toUpperCase(),
+                    payee: (cols[8] || "").toUpperCase(), // Supplier -> Payee
+                    dept: (cols[17] || "").toUpperCase(), // Dept -> Dept
                     date: iDate.value,
-                    req: (cols[4] || "").toUpperCase(),
-                    app: (cols[15] || "").toUpperCase(),
-                    particularsRaw: cols[1] || "",
+                    req: (cols[2] || "").toUpperCase(),   // Buyer -> Req
+                    app: (cols[18] || "").toUpperCase(),  // Approved -> App
+                    particularsRaw: cols[6] || "",        // Description -> Particulars
                     detailsRaw: detailsText,
-                    particulars: (cols[1] || "") + (detailsText ? '\n\n' + detailsText : ''),
+                    particulars: (cols[6] || "") + (detailsText ? '\n\n' + detailsText : ''),
                     amount: parseFloat(rawAmt) || 0,
                     currency: '₱' 
                 };
@@ -593,12 +608,12 @@
                 const fmtAmt = item.amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
                 div.innerHTML = `
-                    <div class="q-header">${item.particularsRaw}</div>
-                    <div class="q-sub">
+                    <div class="q-row-particulars">${item.particularsRaw}</div>
+                    <div class="q-row-payee">
                         <span>${item.payee}</span>
-                        <span><b>${item.currency} ${fmtAmt}</b></span>
+                        <span>${item.currency} ${fmtAmt}</span>
                     </div>
-                    <div class="q-details">${item.detailsRaw}</div>
+                    <div class="q-row-details">${item.detailsRaw}</div>
                     <div class="q-actions">
                         <span class="q-btn q-edit" onclick="editQueueItem(${item.id})">Edit</span>
                         <span class="q-btn q-remove" onclick="removeItem(${item.id})">Remove</span>
